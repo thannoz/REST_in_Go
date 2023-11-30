@@ -1,24 +1,19 @@
 package main
 
 import (
+	"clean/entity"
 	"encoding/json"
 	"net/http"
 )
 
-type Post struct {
-	ID    int    `json:"id"`
-	Title string `json:"title"`
-	Text  string `json:"text"`
-}
-
 var (
-	posts []Post
+	posts []entity.Post
 )
 
 func init() {
-	posts = []Post{
-		Post{ID: 1, Title: "Money on my mind", Text: "Getting money."},
-		Post{ID: 2, Title: "Success", Text: "I will make it no matter what!"},
+	posts = []entity.Post{
+		entity.Post{ID: 1, Title: "Money on my mind", Text: "Getting money."},
+		entity.Post{ID: 2, Title: "Success", Text: "I will make it no matter what!"},
 	}
 }
 
@@ -37,7 +32,7 @@ func getPosts(w http.ResponseWriter, r *http.Request) {
 
 func createPost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	post := Post{}
+	post := entity.Post{}
 
 	// read the request body with NewDecoder & format the json body into the post type
 	err := json.NewDecoder(r.Body).Decode(&post)
