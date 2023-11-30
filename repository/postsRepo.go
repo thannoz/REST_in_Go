@@ -6,7 +6,9 @@ import (
 	"log"
 
 	"cloud.google.com/go/firestore"
+	firebase "firebase.google.com/go"
 	"google.golang.org/api/iterator"
+	"google.golang.org/api/option"
 )
 
 const (
@@ -22,13 +24,27 @@ type PostRepository interface {
 type repo struct{}
 
 // newRepository returns a value that satisfies the PostRepository interface
-func newPostRepository() PostRepository {
+func NewPostRepository() PostRepository {
 	return &repo{}
+}
+
+func createFirestoreClient(ctx context.Context, projectID string) (*firestore.Client, error) {
+	opt := option.WithCredentialsFile("serviceAccount.json")
+	app, err := firebase.NewApp(context.Background(), nil, opt)
+	if err != nil {
+		log.Fatal("error initializing firebase: %v", err)
+	}
+	client, err := app.Firestore(context.TODO())
+	if err != nil {
+		log.Fatalf("Failed to instatiate a firestore client: %v", err)
+		return nil, err
+	}
+	return client, nil
 }
 
 func (r *repo) Save(post *entity.Post) (*entity.Post, error) {
 	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectID)
+	client, err := createFirestoreClient(ctx, projectID)
 	if err != nil {
 		log.Fatalf("Failed to create firestore client: %v", err)
 		return nil, err
@@ -50,7 +66,7 @@ func (r *repo) Save(post *entity.Post) (*entity.Post, error) {
 
 func (r *repo) FindAll() ([]entity.Post, error) {
 	ctx := context.Background()
-	client, err := firestore.NewClient(ctx, projectID)
+	client, err := createFirestoreClient(ctx, projectID)
 	if err != nil {
 		log.Fatalf("Failed to create firestore client: %v", err)
 		return nil, err
@@ -69,7 +85,7 @@ func (r *repo) FindAll() ([]entity.Post, error) {
 			return nil, err
 		}
 		post := entity.Post{
-			ID:    doc.Data()["ID"].(int),
+			ID:    doc.Data()["ID"].(int64),
 			Title: doc.Data()["Title"].(string),
 			Text:  doc.Data()["Text"].(string),
 		}

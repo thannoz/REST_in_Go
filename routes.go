@@ -2,32 +2,28 @@ package main
 
 import (
 	"clean/entity"
+	"clean/repository"
 	"encoding/json"
+	"math/rand"
 	"net/http"
 )
 
 var (
-	posts []entity.Post
+	repo repository.PostRepository = repository.NewPostRepository()
 )
-
-func init() {
-	posts = []entity.Post{
-		entity.Post{ID: 1, Title: "Money on my mind", Text: "Getting money."},
-		entity.Post{ID: 2, Title: "Success", Text: "I will make it no matter what!"},
-	}
-}
 
 func getPosts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	result, err := json.Marshal(posts)
+	posts, err := repo.FindAll()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error": "Error marshalling the posts data"}`))
+		w.Write([]byte(`{"error": "Error finding posts data"}`))
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
-	w.Write(result)
+	json.NewEncoder(w).Encode(posts)
 }
 
 func createPost(w http.ResponseWriter, r *http.Request) {
@@ -42,17 +38,9 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	post.ID = len(posts) + 1
-	posts = append(posts, post)
+	post.ID = rand.Int63()
 
+	repo.Save(&post)
 	w.WriteHeader(http.StatusOK)
-
-	// convert the post object into json
-	result, err := json.Marshal(post)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(`{"error": "Error unmarshalling the request"}`))
-		return
-	}
-	w.Write(result)
+	json.NewEncoder(w).Encode(post)
 }
