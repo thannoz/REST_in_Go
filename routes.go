@@ -3,13 +3,14 @@ package main
 import (
 	"clean/entity"
 	"clean/repository"
+	"clean/repository/firestore"
 	"encoding/json"
 	"math/rand"
 	"net/http"
 )
 
 var (
-	repo repository.PostRepository = repository.NewPostRepository()
+	repo repository.PostRepository = firestore.NewFirestoreRepository()
 )
 
 func getPosts(w http.ResponseWriter, r *http.Request) {
