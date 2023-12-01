@@ -63,14 +63,17 @@ func (r *repo) Save(post *entity.Post) (*entity.Post, error) {
 func (r *repo) FindAll() ([]entity.Post, error) {
 	ctx := context.Background()
 	client, err := createFirestoreClient(ctx, projectID)
+
 	if err != nil {
 		log.Fatalf("Failed to create firestore client: %v", err)
 		return nil, err
 	}
 
 	defer client.Close()
+
 	posts := []entity.Post{}
 	iter := client.Collection(collectionName).Documents(ctx)
+
 	for {
 		doc, err := iter.Next()
 		if err == iterator.Done {

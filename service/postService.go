@@ -2,8 +2,15 @@ package service
 
 import (
 	"clean/entity"
+	"clean/repository"
+	"clean/repository/firestore"
 	"errors"
+	"math/rand"
 	"strings"
+)
+
+var (
+	repo repository.PostRepository = firestore.NewFirestoreRepository()
 )
 
 type PostService interface {
@@ -39,9 +46,11 @@ func (srv *service) Validate(post *entity.Post) error {
 }
 
 func (srv *service) Create(post *entity.Post) (*entity.Post, error) {
-	return nil, nil
+
+	post.ID = rand.Int63()
+	return repo.Save(post)
 }
 
 func (srv *service) FindAll() ([]entity.Post, error) {
-	return nil, nil
+	return repo.FindAll()
 }
