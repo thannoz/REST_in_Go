@@ -12,12 +12,18 @@ var (
 	postService service.PostService = service.NewPostService()
 )
 
+type controller struct{}
+
 type PostController interface {
 	GetPosts(w http.ResponseWriter, r *http.Request)
 	CreatePost(w http.ResponseWriter, r *http.Request)
 }
 
-func GetPosts(w http.ResponseWriter, r *http.Request) {
+func NewPostController() PostController {
+	return &controller{}
+}
+
+func (c *controller) GetPosts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	posts, err := postService.FindAll()
@@ -31,7 +37,7 @@ func GetPosts(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(posts)
 }
 
-func CreatePost(w http.ResponseWriter, r *http.Request) {
+func (c *controller) CreatePost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	post := entity.Post{}
 
